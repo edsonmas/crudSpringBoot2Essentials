@@ -1,6 +1,7 @@
 package crud.curso.cursoCrud.service;
 
 import crud.curso.cursoCrud.domain.Curso;
+import crud.curso.cursoCrud.mapper.CursoMapper;
 import crud.curso.cursoCrud.repository.CursoRepository;
 import crud.curso.cursoCrud.dto.CursoCreateDto;
 import crud.curso.cursoCrud.dto.CursoDto;
@@ -28,35 +29,21 @@ public class CursoService {
     }
 
 
-    public Curso save(CursoCreateDto cursoDto) {
+    public Curso save(CursoCreateDto cursoCreateDto) {
+        Curso cursoMapperToCreate = CursoMapper.INSTANCE.toCurso(cursoCreateDto);
 
-        Curso curso =Curso.builder()
-                .nomeCurso(cursoDto.getNomeCurso())
-                .descricaoCurso(cursoDto.getDescricaoCurso())
-                .valorCurso(cursoDto.getValorCurso())
-                .dataFimInscricao(cursoDto.getDataFimInscricao())
-                .dataInicioInscricao(cursoDto.getDataInicioInscricao())
-                .maxInscritos(cursoDto.getMaxInscritos())
-                .build();
-        return cursoRepository.save(curso);
+        return cursoRepository.save(cursoMapperToCreate);
     }
 
     public void delete(long id) {
         cursoRepository.delete(findByIdOrThrowBadRequestException(id));
     }
 
-    public void replace(CursoDto cursoDto) {
-        findByIdOrThrowBadRequestException(cursoDto.getId());
-        Curso curso =Curso.builder()
-                .id(cursoDto.getId())
-                .nomeCurso(cursoDto.getNomeCurso())
-                .descricaoCurso(cursoDto.getDescricaoCurso())
-                .valorCurso(cursoDto.getValorCurso())
-                .dataFimInscricao(cursoDto.getDataFimInscricao())
-                .dataInicioInscricao(cursoDto.getDataInicioInscricao())
-                .maxInscritos(cursoDto.getMaxInscritos())
-                .build();
+    public void update(CursoDto cursoDto) {
+        Curso cursoToReplace = findByIdOrThrowBadRequestException(cursoDto.getId());
+        Curso cursoMapperToUpdate = CursoMapper.INSTANCE.toCurso(cursoDto);
+        cursoToReplace.setId(cursoToReplace.getId());
 
-        cursoRepository.save(curso);
+        cursoRepository.save(cursoMapperToUpdate);
     }
 }

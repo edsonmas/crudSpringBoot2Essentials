@@ -42,11 +42,9 @@ public class CursoController {
 
     @PutMapping
     public ResponseEntity<Void> replace(@RequestBody CursoDto cursoDto){
-        cursoService.replace(cursoDto);
+        cursoService.update(cursoDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
 
 
 }
