@@ -1,11 +1,14 @@
 package crud.curso.cursoCrud.service;
 
 import crud.curso.cursoCrud.domain.Curso;
+import crud.curso.cursoCrud.exception.BadRequestException;
+import crud.curso.cursoCrud.mapper.CursoMapper;
 import crud.curso.cursoCrud.repository.CursoRepository;
 import crud.curso.cursoCrud.dto.CursoCreateDto;
 import crud.curso.cursoCrud.dto.CursoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,44 +22,39 @@ public class CursoService {
 
 
     public List<Curso> listAll() {
-        return cursoRepository.findAll();
+
+        List<Curso> listaRetornada = cursoRepository.findAll();
+        return listaRetornada;
+    }
+
+    public List<Curso> findByNomeCursoOrThrowBadRequestException(String nomeCurso) {
+        if (nomeCurso.isBlank()){
+            throw new BadRequestException("Nenhum parametro de busca foi passado");
+        }
+        return cursoRepository.findByNomeCurso(nomeCurso);
     }
 
     public Curso findByIdOrThrowBadRequestException(long id) {
         return cursoRepository.findById(id)
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"Curso id not found"));
+                .orElseThrow(()->new BadRequestException("Curso id not found"));
     }
 
 
-    public Curso save(CursoCreateDto cursoDto) {
-
-        Curso curso =Curso.builder()
-                .nomeCurso(cursoDto.getNomeCurso())
-                .descricaoCurso(cursoDto.getDescricaoCurso())
-                .valorCurso(cursoDto.getValorCurso())
-                .dataFimInscricao(cursoDto.getDataFimInscricao())
-                .dataInicioInscricao(cursoDto.getDataInicioInscricao())
-                .maxInscritos(cursoDto.getMaxInscritos())
-                .build();
-        return cursoRepository.save(curso);
+    public Curso save(CursoCreateDto cursoCreateDto) {
+        Curso cursoMapperToCreate = CursoMapper.INSTANCE.toCurso(cursoCreateDto);
+        cursoMapperToCreate.setNomeCurso(cursoCreateDto.getNomeCurso().toUpperCase());
+        return cursoRepository.save(cursoMapperToCreate);
     }
 
     public void delete(long id) {
         cursoRepository.delete(findByIdOrThrowBadRequestException(id));
     }
 
-    public void replace(CursoDto cursoDto) {
-        findByIdOrThrowBadRequestException(cursoDto.getId());
-        Curso curso =Curso.builder()
-                .id(cursoDto.getId())
-                .nomeCurso(cursoDto.getNomeCurso())
-                .descricaoCurso(cursoDto.getDescricaoCurso())
-                .valorCurso(cursoDto.getValorCurso())
-                .dataFimInscricao(cursoDto.getDataFimInscricao())
-                .dataInicioInscricao(cursoDto.getDataInicioInscricao())
-                .maxInscritos(cursoDto.getMaxInscritos())
-                .build();
+    public void update(CursoDto cursoDto) {
+        Curso cursoToReplace = findByIdOrThrowBadRequestException(cursoDto.getId());
+        Curso cursoMapperToUpdate = CursoMapper.INSTANCE.toCurso(cursoDto);
+        cursoToReplace.setId(cursoToReplace.getId());
 
-        cursoRepository.save(curso);
+        cursoRepository.save(cursoMapperToUpdate);
     }
 }

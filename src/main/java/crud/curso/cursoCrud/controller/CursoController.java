@@ -29,6 +29,12 @@ public class CursoController {
         return ResponseEntity.ok(cursoService.findByIdOrThrowBadRequestException(id));
     }
 
+    @GetMapping(path = "/find")
+    public ResponseEntity<List<Curso>> findByNomeCurso(@RequestParam(required = true) String nomeCurso){
+
+        return ResponseEntity.ok(cursoService.findByNomeCursoOrThrowBadRequestException(nomeCurso.toUpperCase()));
+    }
+
     @PostMapping
     public ResponseEntity<Curso> save(@RequestBody CursoCreateDto cursoDto){
         return new ResponseEntity<>(cursoService.save(cursoDto), HttpStatus.CREATED);
@@ -42,11 +48,9 @@ public class CursoController {
 
     @PutMapping
     public ResponseEntity<Void> replace(@RequestBody CursoDto cursoDto){
-        cursoService.replace(cursoDto);
+        cursoService.update(cursoDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
 
 
 }
